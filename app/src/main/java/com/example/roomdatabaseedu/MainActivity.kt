@@ -53,12 +53,12 @@ import androidx.room.Room
 import com.example.roomdatabaseedu.db.Diary
 import com.example.roomdatabaseedu.db.DiaryDAO
 import com.example.roomdatabaseedu.db.DiaryDatabase
+import com.example.roomdatabaseedu.navigation.DiaryNavigation
 import com.example.roomdatabaseedu.ui.theme.RoomDatabaseEduTheme
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
 
 class MainActivity : ComponentActivity() {
     private lateinit var database: DiaryDatabase
@@ -78,84 +78,9 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier
                 ) {
-                    DiaryApp(dao)
+                    DiaryNavigation(dao)
                 }
             }
         }
     }
-}
-
-@Composable
-fun DiaryApp(diaryDAO: DiaryDAO) {
-    val scope = rememberCoroutineScope()
-    var showDialog by remember { mutableStateOf(false) }
-
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(onClick = { showDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Diary")
-            }
-        }
-    ) { padding ->
-        Surface(modifier = Modifier.padding(padding)) {
-        }
-
-        if (showDialog) {
-            AddDiaryDialog(
-                onDismiss = {
-                    showDialog = false
-                },
-                onSave = { title, content ->
-                val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-                val newDiary = Diary(
-                    date = currentDate,
-                    title = title,
-                    content = content
-                )
-                scope.launch {
-                    diaryDAO.saveDiary(newDiary)
-                }
-                showDialog = false
-            })
-        }
-    }
-}
-
-
-@Composable
-fun AddDiaryDialog(onDismiss: () -> Unit, onSave: (String, String) -> Unit) {
-    var title by remember { mutableStateOf("") }
-    var content by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Add New Diary") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("Title") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = content,
-                    onValueChange = { content = it },
-                    label = { Text("Content") },
-                    modifier = Modifier.fillMaxWidth().height(300.dp)
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onSave(title, content) }) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
 }
