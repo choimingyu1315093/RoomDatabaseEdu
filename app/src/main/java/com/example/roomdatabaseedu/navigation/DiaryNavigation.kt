@@ -25,7 +25,7 @@ fun DiaryNavigation(dao: DiaryDAO){
             route = DiaryScreens.DETAILSCREEN.name+"/{diaryIdx}",
             arguments = listOf(navArgument("diaryIdx"){type = NavType.IntType})
         ){
-            DetailScreen(it.arguments?.getInt("diaryIdx"), dao)
+            DetailScreen(navController, it.arguments?.getInt("diaryIdx"), dao)
         }
     }
 }

@@ -22,4 +22,7 @@ interface DiaryDAO {
 
     @Delete
     suspend fun deleteDiary(diary: Diary)
+
+    @Query("DELETE FROM diary WHERE idx = :idx")
+    suspend fun oneDeleteDiary(idx: Int)
 }

@@ -22,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,9 +32,15 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.roomdatabaseedu.db.Diary
 import com.example.roomdatabaseedu.db.DiaryDAO
+import com.example.roomdatabaseedu.navigation.DiaryScreens
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun DetailScreen(
+    navController: NavController,
     diaryIdx: Int?,
     dao: DiaryDAO,
     modifier: Modifier = Modifier
@@ -42,6 +49,8 @@ fun DetailScreen(
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     var isEditing by remember { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         if (diaryIdx != null) {
@@ -67,6 +76,22 @@ fun DetailScreen(
             TextButton(
                 onClick = {
                     isEditing = !isEditing
+                    if(!isEditing) {
+                        val currentData =
+                            SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(
+                                Date()
+                            )
+                        val updateDiary = Diary(
+                            idx = diaryIdx!!,
+                            date = currentData,
+                            title = title,
+                            content = content
+                        )
+                        scope.launch {
+                            dao.updateDiary(updateDiary)
+                            navController.navigate(DiaryScreens.HOMESCREEN.name)
+                        }
+                    }
                 }
             ) {
                 Text(
@@ -76,7 +101,10 @@ fun DetailScreen(
             }
             TextButton(
                 onClick = {
-
+                    scope.launch {
+                        dao.oneDeleteDiary(diaryIdx!!)
+                        navController.navigate(DiaryScreens.HOMESCREEN.name)
+                    }
                 }
             ) {
                 Text(
